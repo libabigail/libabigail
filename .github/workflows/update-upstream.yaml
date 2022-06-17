@@ -1,0 +1,28 @@
+name: Update Libabigail from Upstream
+
+on:
+  schedule:
+    # Run nightly 1am
+    - cron: 0 1 * * *
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    name: Retrieve Upstream Code
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Pull Upstream
+        run: |
+         git remote add upstream https://sourceware.org/git/libabigail.git
+         git pull upstream master
+      - name: Push Changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf "GitHub Actor: ${GITHUB_ACTOR}\n"
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@users.noreply.github.com"
+          git status
+          git --no-pager log --decorate=short --pretty=oneline -n10
+          git push origin master || printf "No changes from upstream\n"
